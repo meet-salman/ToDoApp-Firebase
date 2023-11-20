@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title> Login | SignUp </title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="./dist/output.css">
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@4.3.1/dist/full.min.css" rel="stylesheet" type="text/css" />
+
+</head>
+
+<body>
+
+
+    <!-- NAVBAR STARTS -->
+
+    <div class="navbar bg-base-100 px-5 bg-gradient-to-r from-[#f0f5ff] to-[#d5e6ff]">
+
+        <div class="flex-1">
+            <h1 class="font-semibold text-3xl logo-heading"> Login | SignUp </h1>
+        </div>
+
+        <div id="user-profile" class="flex-none gap-2">
+            <!-- <div class="dropdown dropdown-end">
+                <label tabindex="0" class="btn btn-ghost btn-circle avatar">
+                    <div class="w-10 rounded-full">
+                        <img alt="profile-pic" src="./assets/user-icon.png" />
+                    </div>
+                </label>
+                <ul tabindex="0"
+                    class="mt-3 z-[1] p-2 shadow menu menu-sm dropdown-content bg-base-100 rounded-box w-52">
+                    <li><button>Logout</button></li>
+                </ul>
+            </div> -->
+        </div>
+
+    </div>
+
+
+
+    <dialog id="login_modal" class="modal">
+
+        <div class="modal-box p-[40px] bg-[#f6faff]">
+
+            <form method="dialog">
+                <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
+            </form>
+
+            <div class="text-center mb-[20px]">
+                <h1 class="text-center text-2xl font-medium">Login</h1>
+            </div>
+
+            <form id="signin-form">
+
+                <input id="signin-email" class="input-field" type="email" placeholder="Email" required> <br>
+                <input id="signin-password" class="input-field" type="password" placeholder="Password" required> <br>
+
+                <p id="signin-error" class="text-[0.95rem] text-red-500 mt-1 mb-2"></p>
+
+                <a href="#" id="forgot-password" class="short-link">Forgot Password?</a> <br>
+
+                <label id="remember-me" class="text-[0.95rem]">
+                    <input class=" mt-[30px]" type="checkbox" required> Remember Me
+                </label>
+
+                <br>
+
+                <div class="mt-[20px] mb-[40px]">
+                    <button class="submit" type="submit"> <i class="fa-solid fa-right-to-bracket"></i> &nbsp;
+                        Login</button>
+                </div>
+
+                <div class="p-[15px] rounded-[7px] bg-[#ffffffd5] shadow-lg shadow-[#dfdfdf] mt-4">
+                    <p class="para">Don't have an account? <a href="#" id="signup-short" class="short-link">Sign Up</a>
+                    </p>
+                </div>
+
+            </form>
+
+        </div>
+
+    </dialog>
+
+
+    
+    <dialog id="signup_modal" class="modal">
+
+        <div class="modal-box p-[35px] bg-[#f6faff]">
+
+            <form method="dialog">
+                <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
+            </form>
+
+            <div class="text-center mb-[15px]">
+                <h1 class="text-center text-2xl font-medium">Register</h1>
+            </div>
+
+            <form id="signup-form">
+
+                <input id="name" class="input-field" type="text" placeholder="Name" required> <br>
+                <input id="signup-email" class="input-field" type="email" placeholder="Email" required> <br>
+                <input id="signup-password" class="input-field" type="password" placeholder="Password" required> <br>
+                <input id="confirm-password" class="input-field" type="password" placeholder="Confirm Password"
+                    required> <br>
+
+                <input type="file" id="profile-pic"
+                    class="file-input file-input-bordered file-input-xs w-full max-w-xs mt-[10px] mb-[5px]" /> <br>
+                <label for="profile-pic" class="para">Upload Profile Picture</label>
+
+                <p id="signup-error" class="para"></p>
+
+                <label id="terms-cond" class="para">
+                    <input class="mt-[20px]" type="checkbox" required> Accept <a href="#" class="short-link">Terms &
+                        Conditions</a>
+                </label>
+
+                <div class="mt-[30px]">
+                    <button class="submit" type="submit"> <i class="fa-solid fa-user-plus"></i> &nbsp; Sign Up</button>
+                </div>
+
+            </form>
+
+        </div>
+
+    </dialog>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <script type="module" src="app.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://kit.fontawesome.com/7d6781b227.js" crossorigin="anonymous"></script>
+
+</body>
+
+</html>
