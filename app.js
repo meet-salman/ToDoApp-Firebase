@@ -1,7 +1,7 @@
 // Import Functions from firebase
 import { auth, db, storage } from "./config.js";
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.6.0/firebase-auth.js";
-import { collection, addDoc } from "https://www.gstatic.com/firebasejs/10.6.0/firebase-firestore.js";
+import { collection, doc, addDoc, getDocs, query } from "https://www.gstatic.com/firebasejs/10.6.0/firebase-firestore.js";
 import { ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.6.0/firebase-storage.js";
 
 
@@ -9,6 +9,9 @@ const userProfile = document.querySelector('#user-profile');
 const loginModal = document.querySelector('#login_modal');
 const signupModal = document.querySelector('#signup_modal');
 
+const todoForm = document.querySelector('#todo-form');
+const todoTask = document.querySelector('#todo-task');
+const allTasks = document.querySelector('#all-tasks');
 
 
 // Getting SignUp elements
@@ -106,6 +109,8 @@ onAuthStateChanged(auth, (user) => {
 
 
 // SignUp Function
+
+let currentUser = {};
 signupForm.addEventListener('submit', (e) => {
     e.preventDefault();
 
@@ -128,15 +133,17 @@ signupForm.addEventListener('submit', (e) => {
                 getDownloadURL(storageRef).then((url) => {
 
                     // Add user to DB
-                    addDoc(collection(db, "users"), {
+                    const userData = {
                         name: name.value,
                         email: signupEmail.value,
                         uid: user.uid,
                         profilePic: url
-                    })
+                    }
+                    addDoc(collection(db, "users"), userData)
                         .then(() => {
+                            currentUser = userData;
                             console.log("User added to db");
-                            window.location = 'index.html'
+                            // window.location = 'index.html'
                         })
                         .catch((rej) => {
                             console.log(rej);
@@ -175,6 +182,56 @@ signinForm.addEventListener('submit', (e) => {
             console.log(errorMessage);
         });
 });
+
+
+
+
+
+
+// Getting & Rendrinf Task
+let tasks = [];
+async function gettingTasks() {
+    tasks.length = 0;
+
+    const querySnapshot = await getDocs(collection(db, "Todo Tasks"));
+    querySnapshot.forEach((doc) => {
+
+        tasks.push(doc.data());
+        console.log(tasks);
+    });
+
+    allTasks.innerHTML = ''
+    tasks.forEach(item => {
+
+        allTasks.innerHTML += `
+            <li> ${item.task} <br> <button>Edit</button> <button>Delete</button> </li> <br>
+        `
+    });
+
+};
+gettingTasks();
+
+
+// Adding tasks to DB 
+todoForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+
+    addDoc(collection(db, "Todo Tasks"), {
+        task: todoTask.value
+    })
+        .then(() => {
+            console.log("todo task added");
+        })
+        .catch((rej) => {
+            console.log(rej);
+        });
+
+    gettingTasks();
+});
+
+
+
+
 
 
 
