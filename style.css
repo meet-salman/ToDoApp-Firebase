@@ -41,3 +41,23 @@ body {
     box-shadow: 2px 2px 10px #dddddd;
     font-size: 0.9rem;
 }
+
+#list-icon{
+    font-size: 0.8rem;
+    color: #2e2e2e;
+}
+
+#edit-btn {
+    cursor: pointer;
+    color: #0066ff;
+    border: none;
+    background-color: transparent;
+}
+
+#dlt-btn {
+    cursor: pointer;
+    color: #ff0000;
+    border: none;
+    background-color: transparent;
+
+}

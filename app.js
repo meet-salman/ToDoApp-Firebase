@@ -9,9 +9,11 @@ const userProfile = document.querySelector('#user-profile');
 const loginModal = document.querySelector('#login_modal');
 const signupModal = document.querySelector('#signup_modal');
 
+const todoBox = document.querySelector('#todo-box');
 const todoForm = document.querySelector('#todo-form');
 const todoTask = document.querySelector('#todo-task');
 const allTasks = document.querySelector('#all-tasks');
+const ul = document.querySelector('#ul');
 
 
 // Getting SignUp elements
@@ -34,19 +36,37 @@ const signupShort = document.querySelector('#signup-short');
 
 
 // Check User Login or Logout
-onAuthStateChanged(auth, (user) => {
+let currentUser = {};
+onAuthStateChanged(auth, async (user) => {
     if (user) {
         const uid = user.uid;
         console.log('User ID =>', uid);
 
+
+        // GETTING USER DATA  
+
+        const q = query(collection(db, "users"), where("uid", '==', uid));
+
+        const querySnapshot = await getDocs(q);
+        querySnapshot.forEach((doc) => {
+
+            // currentUser.push(doc.data())
+            currentUser = doc.data();
+            console.log("LoggedIn User =>", currentUser);
+            // userName.innerHTML = currentUser.name
+        });
+
         userProfile.innerHTML = `
 
             <div class="dropdown dropdown-end">
-                <label tabindex="0" class="btn btn-ghost btn-circle avatar">
-                    <div class="w-8 rounded-full">
-                        <img src="./assets/user-icon.png" alt="profile-pic">
-                    </div>
-                </label>
+                <div class="flex items-center">
+                    <label tabindex="0" class="btn btn-ghost btn-circle avatar">
+                        <div class="w-8 rounded-full">
+                            <img src="${currentUser.profilePic}" alt="profile-pic">
+                        </div>
+                    </label>
+                    <p class="text-lg font-medium "> ${currentUser.name} </p>
+                </div>    
                 <ul tabindex="0" class="mt-3 z-[1] p-2 shadow menu menu-sm dropdown-content bg-base-100 rounded-box w-52">
                     <li><button id="logout-btn">Log Out</button></li>
                 </ul>
@@ -88,6 +108,8 @@ onAuthStateChanged(auth, (user) => {
                 </ul>
             </div>
             `
+            todoBox.innerHTML = `<h3 class="text-2xl font-medium text-center text-gray-600">Please Login</h3>`
+
 
         // Open Login & Register Modal on Buttons Click
 
@@ -112,7 +134,6 @@ onAuthStateChanged(auth, (user) => {
 
 // SignUp Function
 
-let currentUser = {};
 signupForm.addEventListener('submit', (e) => {
     e.preventDefault();
 
@@ -145,7 +166,6 @@ signupForm.addEventListener('submit', (e) => {
                         }
                         addDoc(collection(db, "users"), userData)
                             .then(() => {
-                                currentUser = userData;
                                 console.log("User added to db");
                                 window.location = 'index.html'
                             })
@@ -210,12 +230,10 @@ async function gettingAndRenderingTasks() {
         tasks.push({ ...doc.data(), docId: doc.id });
     });
 
-    allTasks.innerHTML = ''
+    ul.innerHTML = ''
     tasks.forEach(item => {
 
-        allTasks.innerHTML += `
-            <li> ${item.task} <br> <button id="edit-btn">Edit</button> <button id="dlt-btn">Delete</button> </li> <br>
-        `
+        ul.innerHTML += (`<li  class="flex  justify-between"> <div> <i id="list-icon" class="fa-solid fa-circle-check"></i> &nbsp; ${item.task} </div>   <div> <button  id="edit-btn"><i class="fa-solid fa-file-pen"></i></button> &nbsp; &nbsp;  <button  id="dlt-btn"><i class="fa-solid fa-trash"></i></button> </li> </div> <br>`);
     });
 
     const loader = document.querySelectorAll('#loader');
@@ -241,9 +259,6 @@ async function gettingAndRenderingTasks() {
             gettingAndRenderingTasks();
         });
     });
-
-
-
 
 };
 
