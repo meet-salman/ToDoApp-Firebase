@@ -15,6 +15,10 @@ body {
     text-decoration: none;
 }
 
+.error{
+    color: rgb(255, 37, 37);
+}
+
 #signin-form .submit,
 #signup-form .submit {
     width: 100%;

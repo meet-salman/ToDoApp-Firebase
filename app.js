@@ -1,7 +1,7 @@
 // Import Functions from firebase
 import { auth, db, storage } from "./config.js";
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.6.0/firebase-auth.js";
-import { collection, doc, addDoc, getDocs, query } from "https://www.gstatic.com/firebasejs/10.6.0/firebase-firestore.js";
+import { collection, doc, addDoc, getDocs, updateDoc, deleteDoc, query, where } from "https://www.gstatic.com/firebasejs/10.6.0/firebase-firestore.js";
 import { ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.6.0/firebase-storage.js";
 
 
@@ -33,7 +33,6 @@ const signupShort = document.querySelector('#signup-short');
 
 
 
-
 // Check User Login or Logout
 onAuthStateChanged(auth, (user) => {
     if (user) {
@@ -62,12 +61,15 @@ onAuthStateChanged(auth, (user) => {
             signOut(auth).then(() => {
                 // Sign-out successful.
                 console.log('Sign-out successful.');
+                location.reload();
 
             }).catch((error) => {
                 console.log(error);
                 // An error happened.
             });
         });
+
+        gettingAndRenderingTasks();
     }
     else {
         console.log('User is signed out');
@@ -114,49 +116,57 @@ let currentUser = {};
 signupForm.addEventListener('submit', (e) => {
     e.preventDefault();
 
-    createUserWithEmailAndPassword(auth, signupEmail.value, signupPassword.value)
-        .then((userCredential) => {
-            const user = userCredential.user;
-            console.log(user);
+    if (signupPassword.value === confirmPassword.value) {
 
-            signupModal.innerHTML = `
-                <span class="loading loading-spinner loading-lg"></span>
-            `
+        createUserWithEmailAndPassword(auth, signupEmail.value, signupPassword.value)
+            .then((userCredential) => {
+                const user = userCredential.user;
+                console.log(user);
 
-            // Upload profile picture
-            profilePic = profilePic.files[0]
-            const storageRef = ref(storage, name.value);
+                signupModal.innerHTML = `
+            <span class="loading loading-spinner loading-lg"></span>
+        `
 
-            uploadBytes(storageRef, profilePic).then(() => {
+                // Upload profile picture
+                profilePic = profilePic.files[0]
+                const storageRef = ref(storage, name.value);
 
-                // Getting profile picture URL
-                getDownloadURL(storageRef).then((url) => {
+                uploadBytes(storageRef, profilePic).then(() => {
 
-                    // Add user to DB
-                    const userData = {
-                        name: name.value,
-                        email: signupEmail.value,
-                        uid: user.uid,
-                        profilePic: url
-                    }
-                    addDoc(collection(db, "users"), userData)
-                        .then(() => {
-                            currentUser = userData;
-                            console.log("User added to db");
-                            // window.location = 'index.html'
-                        })
-                        .catch((rej) => {
-                            console.log(rej);
-                        });
+                    // Getting profile picture URL
+                    getDownloadURL(storageRef).then((url) => {
+
+                        // Add user to DB
+                        const userData = {
+                            name: name.value,
+                            email: signupEmail.value,
+                            uid: user.uid,
+                            profilePic: url
+                        }
+                        addDoc(collection(db, "users"), userData)
+                            .then(() => {
+                                currentUser = userData;
+                                console.log("User added to db");
+                                window.location = 'index.html'
+                            })
+                            .catch((rej) => {
+                                console.log(rej);
+                            });
+                    });
                 });
+
+            })
+            .catch((error) => {
+                const errorCode = error.code;
+                const errorMessage = error.message;
+                console.log(errorMessage);
             });
 
-        })
-        .catch((error) => {
-            const errorCode = error.code;
-            const errorMessage = error.message;
-            console.log(errorMessage);
-        });
+    } else {
+        signupError.innerHTML = 'Password don not match'
+    }
+
+
 });
 
 
@@ -179,7 +189,7 @@ signinForm.addEventListener('submit', (e) => {
         .catch((error) => {
             const errorCode = error.code;
             const errorMessage = error.message;
-            console.log(errorMessage);
+            signinError.innerHTML = errorMessage;
         });
 });
 
@@ -187,46 +197,78 @@ signinForm.addEventListener('submit', (e) => {
 
 
 
-
-// Getting & Rendrinf Task
+// Getting & Rendring Task
 let tasks = [];
-async function gettingTasks() {
+async function gettingAndRenderingTasks() {
     tasks.length = 0;
 
-    const querySnapshot = await getDocs(collection(db, "Todo Tasks"));
+    const q = query(collection(db, "Todo Tasks"), where("uid", '==', auth.currentUser.uid));
+
+    const querySnapshot = await getDocs(q);
     querySnapshot.forEach((doc) => {
 
-        tasks.push(doc.data());
-        console.log(tasks);
+        tasks.push({ ...doc.data(), docId: doc.id });
     });
 
     allTasks.innerHTML = ''
     tasks.forEach(item => {
 
         allTasks.innerHTML += `
-            <li> ${item.task} <br> <button>Edit</button> <button>Delete</button> </li> <br>
+            <li> ${item.task} <br> <button id="edit-btn">Edit</button> <button id="dlt-btn">Delete</button> </li> <br>
         `
     });
 
+    const loader = document.querySelectorAll('#loader');
+    const editBtn = document.querySelectorAll('#edit-btn');
+    const dltBtn = document.querySelectorAll('#dlt-btn');
+
+    dltBtn.forEach((btn, index) => {
+        btn.addEventListener('click', async () => {
+
+            console.log('dlt called');
+            await deleteDoc(doc(db, "Todo Tasks", tasks[index].docId));
+            gettingAndRenderingTasks();
+        });
+    });
+
+    editBtn.forEach((btn, index) => {
+        btn.addEventListener('click', async () => {
+
+            console.log('edit called');
+            await updateDoc(doc(db, "Todo Tasks", tasks[index].docId), {
+                task: prompt('Enter Edited Value')
+            });
+            gettingAndRenderingTasks();
+        });
+    });
+
+
+
+
 };
-gettingTasks();
 
 
-// Adding tasks to DB 
+// Adding tasks to DB
 todoForm.addEventListener('submit', (e) => {
     e.preventDefault();
 
-    addDoc(collection(db, "Todo Tasks"), {
-        task: todoTask.value
-    })
+    const taskObj = {
+        task: todoTask.value,
+        uid: auth.currentUser.uid
+    }
+
+    addDoc(collection(db, "Todo Tasks"), taskObj)
         .then(() => {
+            todoTask.value = '';
+            console.log(doc.ID);
             console.log("todo task added");
         })
         .catch((rej) => {
             console.log(rej);
         });
 
-    gettingTasks();
+    gettingAndRenderingTasks();
+
 });
 
 
